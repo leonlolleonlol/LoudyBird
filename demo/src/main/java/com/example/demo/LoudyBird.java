@@ -7,15 +7,16 @@ import javafx.scene.text.Font;
 
 public class LoudyBird extends GameObject {
     SoundProcessor soundProcessor;
+    public static final int LOUDY_BIRD_WIDTH=50;
 
     public LoudyBird() {
         imageView.setImage(new Image("bird.jpg"));
         soundProcessor = new SoundProcessor( this);
         soundProcessor.startProcessing();
-        w = 50;
+        w = LOUDY_BIRD_WIDTH;
         h = 50;
         ax = vx = vy = 0;
-        ay = 245;
+        ay = 490;
         x = HelloApplication.WIDTH / 3;
         y = HelloApplication.HEIGHT / 3;
     }

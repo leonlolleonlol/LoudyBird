@@ -8,4 +8,8 @@ public class Pipe2 extends GreenPipe {
         h = centerOfPipes-125;
         y = 0;
     }
+    @Override
+    public String toString() {
+        return "Pipe2";
+    }
 }

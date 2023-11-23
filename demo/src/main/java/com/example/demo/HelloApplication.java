@@ -38,7 +38,7 @@ public class HelloApplication extends Application {
 
             @Override
             public void handle(long now) {
-                currentGame[0].update(1 / 30.0);
+                currentGame[0].update(1 / 60.0);
                 currentGame[0].draw(context);
             }
         };

@@ -7,6 +7,7 @@ import javafx.scene.text.Font;
 
 import javax.sound.sampled.*;
 import java.util.ArrayList;
+import java.util.Objects;
 import java.util.Random;
 
 public class CurrentGame {
@@ -14,11 +15,11 @@ public class CurrentGame {
     private final LoudyBird loudybird;
     private final ArrayList<GreenPipe> greenPipes = new ArrayList<>();
     private static boolean finished=false;
+    private int score;
+    private boolean possibilityToAddScore=true;
 
 
     public CurrentGame() throws LineUnavailableException {
-
-        // Open the microphone
         loudybird = new LoudyBird();
         addPipes();
     }
@@ -38,6 +39,7 @@ public class CurrentGame {
         if (greenPipes.get(0).getGauche()<=-GreenPipe.GREEN_PIPE_WIDTH) {
             greenPipes.remove(0);
             greenPipes.remove(0);
+            possibilityToAddScore=true;
         }
         if (tempsEcoule > 8) {
             tempsEcoule = 0;
@@ -45,6 +47,29 @@ public class CurrentGame {
         }
         for (GreenPipe pipe : greenPipes)
             pipe.update(deltaTemps);
+        if(loudybird.soundProcessor.isStartAnimation()) {
+            checkForCollisions();
+            if (greenPipes.get(1).getDroite() < loudybird.getGauche() && possibilityToAddScore) {
+                score++;
+                possibilityToAddScore = false;
+            }
+        }
+    }
+    public void checkForCollisions()
+    {
+        for (GreenPipe pipe : greenPipes) {
+                if (Objects.equals(pipe.toString(), "Pipe2"))
+                    if (loudybird.getHaut() < pipe.getBas()&&checkForCollisionsX(pipe))
+                        finished=true;
+                if (Objects.equals(pipe.toString(), "Pipe"))
+                    if(loudybird.getBas() > pipe.getHaut()&&checkForCollisionsX(pipe))
+                        finished=true;
+            }
+    }
+    public boolean checkForCollisionsX(GreenPipe pipe)
+    {
+        return loudybird.getDroite()-10 > pipe.getGauche()
+                && loudybird.getGauche()< pipe.getDroite();
     }
 
     public void draw(GraphicsContext context) {
@@ -53,6 +78,9 @@ public class CurrentGame {
             loudybird.draw(context);
             for (GreenPipe pipe : greenPipes)
                 pipe.draw(context);
+            context.setFont(Font.font("calibri", 50));
+            context.setFill(Color.BLUE);
+            context.fillText("Score: "+score, 0, HelloApplication.HEIGHT-50);
         }
         else {
             context.setFont(Font.font("calibri", 50));

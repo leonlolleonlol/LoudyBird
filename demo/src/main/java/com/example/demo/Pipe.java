@@ -8,4 +8,9 @@ public class Pipe extends GreenPipe {
         h = (int)HelloApplication.HEIGHT-centerOfPipes-125;
         y = HelloApplication.HEIGHT-h;
     }
+
+    @Override
+    public String toString() {
+        return "Pipe";
+    }
 }
