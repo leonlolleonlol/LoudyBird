@@ -1,2 +1,2 @@
 # LoudyBird
-Like flappy bird but you control the bird with your voice!
+Flappy bird but you control the bird with your voice!
