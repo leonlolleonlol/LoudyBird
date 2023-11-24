@@ -3,7 +3,8 @@ package com.example.demo;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
 import javafx.scene.paint.Color;
-import javafx.scene.text.Font;
+
+import static javafx.scene.paint.Color.BLACK;
 
 public class LoudyBird extends GameObject {
     SoundProcessor soundProcessor;
@@ -32,14 +33,14 @@ public class LoudyBird extends GameObject {
     public void draw(GraphicsContext context) {
             context.drawImage(imageView.getImage(), x, y, w, h);
         if(!soundProcessor.isStartAnimation()) {
-            context.setFont(Font.font("calibri", 25));
-            context.setFill(Color.BLACK);
-            context.fillText("Start Singing!", HelloApplication.WIDTH / 2, HelloApplication.HEIGHT / 2);
+            context.setFill(Color.RED);
+            context.fillOval(HelloApplication.WIDTH / 2-337,HelloApplication.HEIGHT / 2-75,200,150);
+            CurrentGame.sizeAndColorText(25, BLACK, context);
+            context.fillText("Start Singing!", 100, HelloApplication.HEIGHT / 2);
         }
     }
     public void setVy(int soundLevel)
     {
         vy= soundLevel ;
     }
-
 }

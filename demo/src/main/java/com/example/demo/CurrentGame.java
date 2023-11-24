@@ -5,22 +5,30 @@ import javafx.scene.image.Image;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 
-import javax.sound.sampled.*;
+import javax.sound.sampled.LineUnavailableException;
 import java.util.ArrayList;
 import java.util.Objects;
 import java.util.Random;
 
-public class CurrentGame {
-    private double tempsEcoule = 0;
-    private final LoudyBird loudybird;
-    private final ArrayList<GreenPipe> greenPipes = new ArrayList<>();
-    private static boolean finished=false;
-    private int score;
-    private boolean possibilityToAddScore=true;
+import static javafx.scene.paint.Color.BLUE;
+import static javafx.scene.paint.Color.RED;
 
+public class CurrentGame {
+    public double tempsEcoule,threeSecondsStopwatch,timeForBG;
+    private final LoudyBird loudybird;
+    private final ArrayList<GreenPipe> greenPipes;
+    private static boolean finished;
+    private int score;
+    private boolean possibilityToAddScore;
 
     public CurrentGame() throws LineUnavailableException {
         loudybird = new LoudyBird();
+        greenPipes = new ArrayList<>();
+        finished=false;
+        possibilityToAddScore=true;
+        tempsEcoule = 0;
+        threeSecondsStopwatch=0;
+        timeForBG=0;
         addPipes();
     }
     public int randomCenterOfTwoPipes()
@@ -34,37 +42,43 @@ public class CurrentGame {
         greenPipes.add(new Pipe(centerOfPipes));
     }
     public void update(double deltaTemps) {
-        tempsEcoule += deltaTemps;
-        loudybird.update(deltaTemps);
-        if (greenPipes.get(0).getGauche()<=-GreenPipe.GREEN_PIPE_WIDTH) {
-            greenPipes.remove(0);
-            greenPipes.remove(0);
-            possibilityToAddScore=true;
-        }
-        if (tempsEcoule > 8) {
-            tempsEcoule = 0;
-            addPipes();
-        }
-        for (GreenPipe pipe : greenPipes)
-            pipe.update(deltaTemps);
-        if(loudybird.soundProcessor.isStartAnimation()) {
-            checkForCollisions();
-            if (greenPipes.get(1).getDroite() < loudybird.getGauche() && possibilityToAddScore) {
-                score++;
-                possibilityToAddScore = false;
+        if(!finished) {
+            tempsEcoule += deltaTemps;
+            timeForBG+= deltaTemps;
+            loudybird.update(deltaTemps);
+            if (greenPipes.get(0).getGauche() <= -GreenPipe.GREEN_PIPE_WIDTH) {
+                greenPipes.remove(0);
+                greenPipes.remove(0);
+                possibilityToAddScore = true;
             }
+            if (tempsEcoule>8) {
+                tempsEcoule=0;
+                addPipes();
+            }
+            for (GreenPipe pipe : greenPipes)
+                pipe.update(deltaTemps);
+            if (loudybird.soundProcessor.isStartAnimation()) {
+                checkForCollisions();
+                if (greenPipes.get(1).getDroite() < loudybird.getGauche() && possibilityToAddScore) {
+                    score++;
+                    possibilityToAddScore = false;
+                }
+            }
+        }
+        else {
+            threeSecondsStopwatch+=deltaTemps;
         }
     }
     public void checkForCollisions()
     {
         for (GreenPipe pipe : greenPipes) {
                 if (Objects.equals(pipe.toString(), "Pipe2"))
-                    if (loudybird.getHaut() < pipe.getBas()&&checkForCollisionsX(pipe))
+                    if (loudybird.getHaut()+10 < pipe.getBas()&&checkForCollisionsX(pipe))
                         finished=true;
                 if (Objects.equals(pipe.toString(), "Pipe"))
-                    if(loudybird.getBas() > pipe.getHaut()&&checkForCollisionsX(pipe))
+                    if(loudybird.getBas()-10 > pipe.getHaut()&&checkForCollisionsX(pipe))
                         finished=true;
-            }
+        }
     }
     public boolean checkForCollisionsX(GreenPipe pipe)
     {
@@ -73,23 +87,34 @@ public class CurrentGame {
     }
 
     public void draw(GraphicsContext context) {
+        if((int)timeForBG==21)
+            timeForBG=0;
+        context.drawImage(new Image("bg.png"), -timeForBG*30, 0, HelloApplication.WIDTH, HelloApplication.HEIGHT);
+        context.drawImage(new Image("bg.png"), HelloApplication.WIDTH-timeForBG*30-185, 0, HelloApplication.WIDTH, HelloApplication.HEIGHT);
         if(!finished) {
-            context.drawImage(new Image("bg.png"), 0, 0, HelloApplication.WIDTH, HelloApplication.HEIGHT);
             loudybird.draw(context);
             for (GreenPipe pipe : greenPipes)
                 pipe.draw(context);
-            context.setFont(Font.font("calibri", 50));
-            context.setFill(Color.BLUE);
-            context.fillText("Score: "+score, 0, HelloApplication.HEIGHT-50);
+            sizeAndColorText(50, BLUE, context);
+            context.fillText(loudybird.soundProcessor.getSoundLevel()+" dB Score: "+score, 0, HelloApplication.HEIGHT-50);
         }
         else {
-            context.setFont(Font.font("calibri", 50));
-            context.setFill(Color.RED);
-            context.fillText("YOU LOST!", HelloApplication.WIDTH / 2 - 50, HelloApplication.HEIGHT / 2);
+            sizeAndColorText(50, RED, context);
+            context.fillText("YOU LOST! Restarting in "+Math.round(3-threeSecondsStopwatch), 150, HelloApplication.HEIGHT / 2);
         }
     }
 
     public static void setFinished(boolean finished) {
         CurrentGame.finished = finished;
+    }
+
+    public static boolean isFinished() {
+        return finished;
+    }
+
+    public static void sizeAndColorText(int size, Color color, GraphicsContext context)
+    {
+        context.setFont(Font.font("calibri", size));
+        context.setFill(color);
     }
 }

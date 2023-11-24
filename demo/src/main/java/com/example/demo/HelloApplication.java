@@ -9,6 +9,8 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 
+import javax.sound.sampled.LineUnavailableException;
+
 public class HelloApplication extends Application {
     public static final double WIDTH = 800, HEIGHT = 600;
 
@@ -38,14 +40,23 @@ public class HelloApplication extends Application {
 
             @Override
             public void handle(long now) {
-                currentGame[0].update(1 / 60.0);
-                currentGame[0].draw(context);
+                if(currentGame[0].threeSecondsStopwatch<3) {
+                    currentGame[0].update(1 / 60.0);
+                    currentGame[0].draw(context);
+                }
+                else {
+                    try {
+                        SoundProcessor.getTargetDataLine();
+                        currentGame[0] = new CurrentGame();
+                    } catch (LineUnavailableException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
             }
         };
         timer.start();
-
         primaryStage.setScene(scene);
-        primaryStage.setResizable(false);
+        primaryStage.setResizable(true);
         primaryStage.setTitle("Loudy Bird");
         primaryStage.show();
     }

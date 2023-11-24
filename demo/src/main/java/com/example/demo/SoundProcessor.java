@@ -6,9 +6,10 @@ import java.util.concurrent.Executors;
 
 public class SoundProcessor {
 
-    private TargetDataLine targetDataLine;
+    private static TargetDataLine targetDataLine;
     private final LoudyBird loudyBird;
     private boolean startAnimation=false;
+    private int soundLevel=0;
 
     public SoundProcessor(LoudyBird loudyBird) {
         this.loudyBird = loudyBird;
@@ -59,9 +60,9 @@ public class SoundProcessor {
             // Create a buffer to read data from the microphone
             byte[] buffer = new byte[targetDataLine.getBufferSize() / 5];
 
-            while (true) {
+            while (!CurrentGame.isFinished()) {
                 int bytesRead = targetDataLine.read(buffer, 0, buffer.length);
-                int soundLevel = calculateSoundLevel(buffer, bytesRead);
+                soundLevel = calculateSoundLevel(buffer, bytesRead);
 
                 // Update the LoudyBird object with the sound level
                 if(soundLevel>15) {
@@ -81,11 +82,22 @@ public class SoundProcessor {
             short sample = (short) ((buffer[i] & 0xFF) | (buffer[i + 1] << 8));
             sum += Math.abs(sample);
         }
-        return sum / (bytesRead / 2);
+        if(bytesRead==0)
+            return 0;
+        else
+            return sum / (bytesRead / 2);
     }
 
     public boolean isStartAnimation() {
         return startAnimation;
+    }
+
+    public static void getTargetDataLine() {
+        targetDataLine.close();
+    }
+
+    public int getSoundLevel() {
+        return soundLevel;
     }
 }
 
